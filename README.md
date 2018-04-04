@@ -1,6 +1,6 @@
 # HeartThisApp
 
-Android application sample using HeartThisAt API
+Sample application using HeartThisAt API
 
 ## Libs
  * Dagger 2 
