@@ -11,70 +11,61 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import fernanda.heartthisapp.App;
 import fernanda.heartthisapp.R;
 import fernanda.heartthisapp.TrackRecyclerViewAdapter;
+import fernanda.heartthisapp.model.Artist;
 import fernanda.heartthisapp.model.Track;
-import fernanda.heartthisapp.model.component.DaggerTrackComponent;
-import fernanda.heartthisapp.model.module.TrackFragmentModule;
-import fernanda.heartthisapp.presenter.TrackPresenterImpl;
+import fernanda.heartthisapp.model.injection.component.DaggerTrackComponent;
+import fernanda.heartthisapp.model.injection.module.TrackModule;
+import fernanda.heartthisapp.presenter.TrackContract;
+import fernanda.heartthisapp.presenter.TrackPresenter;
 
-/**
- * Created by Fernanda on 08/12/2016.
- */
+public class TrackFragment extends Fragment implements TrackContract.View {
 
-public class TrackFragment extends Fragment implements TrackView {
+    private static final String ARTIST_OBJECT = "ARTIST_OBJECT";
 
     @Inject
-    TrackPresenterImpl presenter;
-
-    String permalink;
-
-    TrackRecyclerViewAdapter adapter;
-    LinearLayoutManager linearLayoutManager;
-    List<Track> artistTrackList;
-    private Unbinder unbinder;
+    TrackPresenter presenter;
 
     @BindView(R.id.recycler_view_track)
     RecyclerView recyclerView;
 
-    @BindView(R.id.track_list_title)
-    TextView trackTitle;
+    private TrackRecyclerViewAdapter adapter;
+
+    public static TrackFragment newInstance(Artist artist) {
+        TrackFragment fragment = new TrackFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(ARTIST_OBJECT, artist);
+        fragment.setArguments(args);
+
+        return fragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getComponent();
+        readExtras();
+    }
 
-        if(savedInstanceState != null) {
-            permalink = savedInstanceState.getString("permalink");
+    private void readExtras() {
+        if (getArguments().getParcelable(ARTIST_OBJECT) != null) {
+            presenter.setArtist(getArguments().getParcelable(ARTIST_OBJECT));
         }
-        DaggerTrackComponent.builder()
-                .netComponent(((App) getActivity().getApplicationContext()).getNetComponent())
-                .trackFragmentModule(new TrackFragmentModule(this))
-                .build().inject(this);
-
-        artistTrackList = new ArrayList<>();
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracks, container, false);
-        unbinder = ButterKnife.bind(this, view);
-
-        linearLayoutManager = new LinearLayoutManager(getContext());
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(linearLayoutManager);
+        ButterKnife.bind(this, view);
 
         return view;
     }
@@ -82,27 +73,20 @@ public class TrackFragment extends Fragment implements TrackView {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        trackTitle.setText(permalink+" tracks");
-        presenter.loadTrack(permalink);
+        presenter.loadTrack();
     }
 
     @Override
     public void showTracks(List<Track> tracks) {
-        for(int i = 0; i < tracks.size(); i++) {
-            artistTrackList.add(tracks.get(i));
-        }
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
-        adapter = new TrackRecyclerViewAdapter(artistTrackList, this.getContext());
-        adapter.setTrackList(artistTrackList);
-        adapter.setCallback(new TrackRecyclerViewAdapter.Callback() {
-            @Override
-            public void onItemClick(Track track) {
-                ((MainActivity)getContext()).playSong(track.getStream_url());
-            }
-        });
+        adapter = new TrackRecyclerViewAdapter(presenter, this.getContext());
+        adapter.setTrackList(tracks);
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
-
     }
 
     @Override
@@ -111,13 +95,14 @@ public class TrackFragment extends Fragment implements TrackView {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString("permalink", permalink);
+    public void playTrack(String stream_url) {
+        ((MainActivity) getContext()).playSong(stream_url);
     }
 
-    public void setPermalink(String permalink) {
-        this.permalink = permalink;
+    public void getComponent() {
+        DaggerTrackComponent.builder()
+                .netComponent(((App) getActivity().getApplicationContext()).getNetComponent())
+                .trackModule(new TrackModule(this))
+                .build().inject(this);
     }
-
 }

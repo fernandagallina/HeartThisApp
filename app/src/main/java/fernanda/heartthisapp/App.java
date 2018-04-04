@@ -2,10 +2,10 @@ package fernanda.heartthisapp;
 
 import android.app.Application;
 
-import fernanda.heartthisapp.model.component.DaggerNetComponent;
-import fernanda.heartthisapp.model.component.NetComponent;
-import fernanda.heartthisapp.model.module.AppModule;
-import fernanda.heartthisapp.model.module.NetModule;
+import fernanda.heartthisapp.model.injection.component.DaggerNetComponent;
+import fernanda.heartthisapp.model.injection.component.NetComponent;
+import fernanda.heartthisapp.model.injection.module.AppModule;
+import fernanda.heartthisapp.model.injection.module.NetModule;
 
 /**
  * Created by Fernanda on 06/12/2016.

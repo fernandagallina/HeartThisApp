@@ -1,4 +1,4 @@
-package fernanda.heartthisapp.model;
+package fernanda.heartthisapp.model.injection;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

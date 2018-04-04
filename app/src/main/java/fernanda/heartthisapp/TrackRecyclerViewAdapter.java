@@ -16,92 +16,75 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import fernanda.heartthisapp.model.Track;
+import fernanda.heartthisapp.presenter.TrackPresenter;
 
-/**
- * Created by Fernanda on 08/12/2016.
- */
+public class TrackRecyclerViewAdapter extends RecyclerView.Adapter<TrackRecyclerViewAdapter.TrackItemViewHolder> {
 
-public class TrackRecyclerViewAdapter extends RecyclerView.Adapter<TrackRecyclerViewAdapter.TrackHolders>{
-    private List<Track> trackList = new ArrayList<>();
-    private Callback callback;
-    private Context context;
+    private final TrackItemListener listener;
+    private final Context context;
 
-    public TrackRecyclerViewAdapter(List<Track> track, Context context) {
-        trackList = track;
+    private List<Track> tracks = new ArrayList<>();
+
+    public interface TrackItemListener {
+        void onItemClick(Track track);
+    }
+
+    public TrackRecyclerViewAdapter(TrackPresenter presenter, Context context) {
+        listener = presenter;
         this.context = context;
     }
 
     @Override
-    public TrackHolders onCreateViewHolder(ViewGroup parent, int viewType) {
+    public TrackItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_track_item, parent, false);
-        final TrackHolders trackHolders = new TrackHolders(view);
-        trackHolders.contentLayoutTrack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(callback != null) {
-                    callback.onItemClick(trackHolders.track);
-                }
-            }
-        });
-        return  trackHolders;
+                .inflate(R.layout.i_track, parent, false);
+
+        return new TrackItemViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(TrackHolders holder, int position) {
-        holder.track = trackList.get(position);
-        holder.trackName.setText(trackList.get(position).getTitle());
-        holder.duration.setText(trackList.get(position).getDuration());
-//        holder.trackDescription.setText(trackList.get(position).getDescription());
-        holder.trackGenre.setText(trackList.get(position).getGenre());
-        Picasso.with(context).load(trackList.get(position).getArtwork_url()).into(holder.imageView);
+    public void onBindViewHolder(TrackItemViewHolder holder, int position) {
+        holder.onBind(tracks.get(position), context, listener);
     }
 
     @Override
     public int getItemCount() {
-        return trackList.size();
+        return tracks.size();
     }
-
     public void setTrackList(List<Track> trackList) {
-        this.trackList = trackList;
-    }
-
-    public void setCallback(Callback callback) {
-        this.callback = callback;
+        tracks = trackList;
     }
 
 
-    public static class TrackHolders extends RecyclerView.ViewHolder {
+    public static class TrackItemViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.content_layout_track)
-        public View contentLayoutTrack;
-
-        public Track track;
-
+        View contentLayoutTrack;
         @BindView(R.id.track_image)
-        public ImageView imageView;
-
+        ImageView imageView;
         @BindView(R.id.track_name)
-        public TextView trackName;
-
+        TextView trackName;
         @BindView(R.id.duration)
-        public TextView duration;
-
-//        @BindView(R.id.track_description)
-//        public TextView trackDescription;
-
+        TextView duration;
         @BindView(R.id.track_genre)
-        public TextView trackGenre;
+        TextView trackGenre;
 
-
-        public TrackHolders(View itemView) {
+        TrackItemViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
-    }
 
-    public interface Callback {
-        void onItemClick(Track track);
+        void onBind(Track track, Context context, TrackItemListener listener) {
+            trackName.setText(track.title);
+            duration.setText(track.getDuration());
+            trackGenre.setText(track.genre);
+            Picasso.with(context).load(track.artwork_url).into(imageView);
+            contentLayoutTrack.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onItemClick(track);
+                }
+            });
+        }
     }
 }
 
