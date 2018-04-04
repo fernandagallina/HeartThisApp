@@ -1,4 +1,4 @@
-package fernanda.heartthisapp.model.module;
+package fernanda.heartthisapp.model.injection.module;
 
 import android.app.Application;
 

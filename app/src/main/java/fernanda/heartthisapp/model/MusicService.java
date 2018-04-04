@@ -18,33 +18,16 @@ import java.util.ArrayList;
  * Created by Fernanda on 10/12/2016.
  */
 public class MusicService extends Service implements
-        MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
-        MediaPlayer.OnCompletionListener{
+        MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener {
 
-    //media player
-    private MediaPlayer player;
-    //song list
-    private ArrayList<Track> songs;
-    //current position
-    private int songPosn;
     private final IBinder musicBind = new MusicBinder();
+
+    private MediaPlayer player = new MediaPlayer();
+    private int resumePosition = 0;
 
     public void onCreate() {
         super.onCreate();
-        player = new MediaPlayer();
         initMusicPlayer();
-    }
-
-    public void initMusicPlayer() {
-        player.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        player.setOnPreparedListener(this);
-        player.setOnCompletionListener(this);
-        player.setOnErrorListener(this);
-    }
-
-    public void setList(ArrayList<Track> tracks) {
-        songs = tracks;
     }
 
     @Nullable
@@ -61,19 +44,20 @@ public class MusicService extends Service implements
     }
 
     @Override
-    public void onCompletion(MediaPlayer mp) {
-
-    }
-
-    @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         return false;
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        //start playback
         mp.start();
+    }
+
+    private void initMusicPlayer() {
+        player.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        player.setOnPreparedListener(this);
+        player.setOnErrorListener(this);
     }
 
     public void playMedia() {
@@ -82,7 +66,6 @@ public class MusicService extends Service implements
         }
     }
 
-    int resumePosition;
     public void pauseOrResumeMedia() {
         if(player.isPlaying()) {
             player.pause();
@@ -94,28 +77,24 @@ public class MusicService extends Service implements
 
     }
 
-    public class MusicBinder extends Binder {
-        public MusicService getService() {
-            return MusicService.this;
-        }
-    }
-
     public void playSong(String song) {
         player.reset();
         Uri streamUri = Uri.parse(song);
 
         try {
             player.setDataSource(getApplicationContext(), streamUri);
-        } catch (IllegalArgumentException e) {
-            Toast.makeText(getApplicationContext(), ""+e, Toast.LENGTH_LONG).show();
-        } catch (SecurityException e) {
-            Toast.makeText(getApplicationContext(), ""+e, Toast.LENGTH_LONG).show();
-        } catch (IllegalStateException e) {
+        } catch (IllegalArgumentException | IllegalStateException | SecurityException e) {
             Toast.makeText(getApplicationContext(), ""+e, Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         player.prepareAsync();
+    }
+
+    public class MusicBinder extends Binder {
+        public MusicService getService() {
+            return MusicService.this;
+        }
     }
 }

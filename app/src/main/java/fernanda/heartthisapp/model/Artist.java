@@ -1,40 +1,43 @@
 package fernanda.heartthisapp.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
+public class Artist implements Parcelable {
 
-/**
- * Created by Fernanda on 06/12/2016.
- */
+    @SerializedName("track_count")
+    public String numberOfTracks;
+    @SerializedName("followers_count")
+    public String numberOfFollowers;
+    public User user;
 
-public class Artist {
-
-    String track_count;
-    String followers_count;
-
-    public void setTrack_count(String track_count) {
-        this.track_count = track_count;
+    protected Artist(Parcel in) {
+        numberOfTracks = in.readString();
+        numberOfFollowers = in.readString();
     }
 
-    public void setFollowers_count(String followers_count) {
-        this.followers_count = followers_count;
+    public static final Creator<Artist> CREATOR = new Creator<Artist>() {
+        @Override
+        public Artist createFromParcel(Parcel in) {
+            return new Artist(in);
+        }
+
+        @Override
+        public Artist[] newArray(int size) {
+            return new Artist[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public String getTrack_count() {
-        return track_count;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(numberOfTracks);
+        dest.writeString(numberOfFollowers);
     }
-
-    public String getFollowers_count() {
-        return followers_count;
-    }
-
-    User user;
-
-    public Artist() {
-    }
-
-    public User getUser() {
-        return user;
-    }
- }
+}

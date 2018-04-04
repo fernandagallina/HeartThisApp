@@ -3,22 +3,42 @@
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'com.android.tools.build:gradle:3.0.1'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
 }
 
 allprojects {
     repositories {
         jcenter()
+        google()
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+project.ext.set("minSdkVersion", 19)
+project.ext.set("targetSdkVersion", 26)
+project.ext.set("buildToolsVersion", '26.0.2')
+
+project.ext.set("supportVersion", '26.0.2')
+project.ext.set("daggerVersion", '2.14.1')
+project.ext.set("guavaVersion", '19.0')
+project.ext.set("javaxAnnotationVersion", '1.0')
+project.ext.set("retrofitVersion", '2.3.0')
+project.ext.set("butterKnifeVersion", '8.4.0')
+project.ext.set("rxjava2Version", '2.1.7')
+project.ext.set("rxandroid2Version", '2.0.1')
+project.ext.set("jodaTimeVersion", '2.9.6')
+project.ext.set("glideVersion", '4.4.0')
+project.ext.set("glideOkhttpIntegrationVersion", '4.4.0')
+project.ext.set("calligraphyVersion", '2.1.0')
+project.ext.set("materialCalendarViewVersion", '1.3.0')
+project.ext.set("facebookVersion", '4.18.0')
+project.ext.set("okhttpLoggingInterceptorVersion", '3.4.1')
+project.ext.set("okhttp2Curl", '0.3.1')

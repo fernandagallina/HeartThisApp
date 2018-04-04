@@ -1,10 +1,10 @@
-package fernanda.heartthisapp.model.component;
+package fernanda.heartthisapp.model.injection.component;
 
 import android.app.Activity;
 
 import dagger.Component;
-import fernanda.heartthisapp.model.CustomScope;
-import fernanda.heartthisapp.model.module.TrackFragmentModule;
+import fernanda.heartthisapp.model.injection.CustomScope;
+import fernanda.heartthisapp.model.injection.module.TrackModule;
 import fernanda.heartthisapp.ui.TrackFragment;
 
 /**
@@ -13,7 +13,7 @@ import fernanda.heartthisapp.ui.TrackFragment;
 
 
 @CustomScope
-@Component(dependencies = NetComponent.class, modules = TrackFragmentModule.class)
+@Component(dependencies = NetComponent.class, modules = TrackModule.class)
 public interface TrackComponent {
 
     void inject(TrackFragment fragment);

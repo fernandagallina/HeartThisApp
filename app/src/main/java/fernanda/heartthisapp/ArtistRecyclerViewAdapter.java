@@ -16,87 +16,76 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import fernanda.heartthisapp.model.Artist;
+import fernanda.heartthisapp.presenter.ArtistPresenter;
 
-/**
- * Created by Fernanda on 07/12/2016.
- */
+public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ArtistItemViewHolder> {
 
-public class ArtistRecyclerViewAdapter extends RecyclerView.Adapter<ArtistRecyclerViewAdapter.ArtistsHolders>{
+    private final ArtistItemListener listener;
+    private final Context context;
 
-    private List<Artist> artistList = new ArrayList<>();
-    private Callback callback;
-    private Context context;
+    private List<Artist> artists = new ArrayList<>();
 
-    public ArtistRecyclerViewAdapter(List<Artist> artists, Context context) {
-        artistList = artists;
+    public interface ArtistItemListener {
+        void onItemClick(Artist artist);
+    }
+
+    public ArtistRecyclerViewAdapter(ArtistPresenter presenter, Context context) {
+        listener = presenter;
         this.context = context;
     }
 
     @Override
-    public ArtistsHolders onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ArtistItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_artist_item, parent, false);
-        final ArtistsHolders artistsHolders = new ArtistsHolders(view);
-        artistsHolders.contentLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(callback != null) {
-                    callback.onItemClick(artistsHolders.artist);
-                }
-            }
-        });
-        return  artistsHolders;
+                .inflate(R.layout.i_artist, parent, false);
+
+        return new ArtistItemViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ArtistsHolders holder, int position) {
-        holder.artist = artistList.get(position);
-        holder.artistName.setText(artistList.get(position).getUser().getUsername());
-        holder.tracks_count.setText("Tracks: " + artistList.get(position).getTrack_count());
-        holder.followers.setText("Followers: " + artistList.get(position).getFollowers_count());
-        Picasso.with(context).load(artistList.get(position).getUser().getAvatar_url()).into(holder.imageView);
+    public void onBindViewHolder(ArtistItemViewHolder holder, int position) {
+        holder.onBind(artists.get(position), context, listener);
     }
 
     @Override
     public int getItemCount() {
-        return artistList.size();
+        return artists.size();
     }
 
     public void setArtistList(List<Artist> artistList) {
-        this.artistList = artistList;
-    }
-
-    public void setCallback(Callback callback) {
-        this.callback = callback;
+        artists = artistList;
     }
 
 
-    public static class ArtistsHolders extends RecyclerView.ViewHolder {
+    static class ArtistItemViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.content_layout)
-        public View contentLayout;
-
-        public Artist artist;
-
+        View contentLayout;
         @BindView(R.id.artist_image)
-        public ImageView imageView;
-
+        ImageView imageView;
         @BindView(R.id.artist_name)
-        public TextView artistName;
-
+        TextView artistName;
         @BindView(R.id.followers)
-        public TextView followers;
+        TextView followers;
+        @BindView(R.id.numberOfTracks)
+        TextView tracks_count;
 
-        @BindView(R.id.track_count)
-        public TextView tracks_count;
-
-        public ArtistsHolders(View itemView) {
+        ArtistItemViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
-    }
 
-    public interface Callback {
-        void onItemClick(Artist artist);
+        void onBind(final Artist artist, Context context, final ArtistItemListener listener) {
+            artistName.setText(artist.user.username);
+            tracks_count.setText(String.format("Tracks: %s", artist.numberOfTracks));
+            followers.setText(String.format("Followers: %s", artist.numberOfFollowers));
+            Picasso.with(context).load(artist.user.avatar_url).into(imageView);
+
+            contentLayout.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onItemClick(artist);
+                }
+            });
+        }
     }
 }
